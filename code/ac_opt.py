@@ -34,25 +34,16 @@ def compute_nk(Xk=None,tau=None):
 def compute_Ex(X0=None,Xk=None,Gs=None,Htilde=None,Ga=None,tau=None):
 	nk = compute_nk(Xk=Xk,tau=tau)
 	vk = nk*1.0/tau
-	                                                    
-        print 'Xk=\n', Xk
-        print 'nk=\n', nk
-        print 'vk=\n', vk
-        sys.exit()
 	XGsX = 0.5*(X0.transpose().dot(Gs)).dot(X0) 
 	vHtildev = tau*1.0*( ((vk.transpose()).dot(Htilde)).dot(vk)).trace()
-	xGav =  tau*1.0*( ((Xk).dot(Ga)).dot(vk)).trace()
-
+	xGav     = tau*1.0*( ((Xk).dot(Ga)).dot(vk)).trace()
         #neglecting epsilon.transpose().dot(X0) contribution (fixed-cost)
 	Ex=XGsX+vHtildev+xGav
-	#print xGav
-	#print vHtildev
-	#print XGsX
-	#print Ex
 	return Ex
 
 def compute_Vx(Xk=None,C=None,tau=None):
-	Vx =  tau*1.0*(((Xk).dot(C)).dot(Xk.transpose())).trace()
+        Xkl=Xk[1:,:]
+	Vx =  tau*1.0*(((Xkl).dot(C)).dot(Xkl.transpose())).trace()
 	return Vx
 
 def get_L(A=None,lam=None):
@@ -72,8 +63,6 @@ def get_Xk(D=None,v=None,N=None,z0=None,sqrt_inv_Htilde=None):
                 #print 'D=',D
                 #print 'Dp= \n',Dp
                 Dp = (v.transpose()).dot(Dp).dot(v)
-                #if tk>1:
-                #    sys.exit()
 		zk = Dp.dot(z0)
 		xk = (sqrt_inv_Htilde.dot(v)).dot(zk)
 		l.append(xk.real)
@@ -82,34 +71,34 @@ def get_Xk(D=None,v=None,N=None,z0=None,sqrt_inv_Htilde=None):
 
 
 def get_min_impact_min_var():
-    print 'IMPLEMENT ME!'
+    print 'in get min_impact_min-- IMPLEMENT ME!'
     pass
 
 
 
 
 
-n=2             #no. securities
-gamma=5           #linear permanent impact ((dollar/share)/share) gamma g(v) = gamma*v
+n=5             #no. securities
+gamma=0.00000250    #linear permanent impact [ ($/share)/share ] gamma g(v_k) = gamma*v ; E<-sum_k( t*x_k*g(v))
                 
-eta=10         # Hij = Hij*deltaij*eta_i
-x0=5000         #seed amt to trade (buy/sell)
-N = 10           #no. trade intervals
+eta=5           #Hij = Hij*deltaij*eta_i [ ($/share)*1/(share/time)] ; h(v_k) = eta n_k/t ; E<-sum_k(   n_k*h(v))
+x0=500         #seed amt to trade (buy/sell)
+N = 5           #no. trade intervals
 T = N           #no. time intervals
 tau = T*1.0/N   #time per trade interval
 
 
 #vector of initial holdings
-X0 = np.array([ np.rint( random.choice([-1,1])*x0*random.uniform(0.5,1))  for x in range(n)])
+X0 = np.array([ np.rint( random.uniform(0,1)*random.choice([-1,1])*x0)  for x in range(n)])
 
 # Hij = deltaij*eta_ij
-H =  np.diag(np.array([eta*random.uniform(0.5,1.) for x in range(n)]))
+H =  np.diag(np.array([eta  for x in range(n)]))
 # Gij = deltaij*gamma_ij
-G =  np.diag(np.array([gamma*random.uniform(0.5,1.0) for x in range(n)]))
+G =  np.diag(np.array([gamma for x in range(n)]))
 
-b =  np.random.uniform(0,100, size=(n,n))
+b =  np.random.uniform(0,1, size=(n,n))
 C =  0.5*(b + b.transpose())
-C *= 0.01
+#C *= 0.01
 Hs = 0.5*(H+H.transpose())
 Gs = 0.5*(G+G.transpose())
 Ga = 0.5*(G-G.transpose())
@@ -129,22 +118,14 @@ A = (sqrt_inv_Htilde.dot(C)).dot(sqrt_inv_Htilde.transpose())
 B = (sqrt_inv_Htilde.dot(Ga)).dot(sqrt_inv_Htilde.transpose())
 
 
-
-
 evl=[]
 Xl=[]
 
-laml = np.logspace(-6,1)
-#lamnl=-1*np.logspace(-6,-1)
+laml = np.logspace(-6,0)
+#lamnl=-1*np.logspace(-6,-0)
 #laml =np.sort( list(laml)+list(lamnl))
-laml = np.sort(list(laml))
 
-print 'G\n',G
-print 'H\n',H 
-print 'C\n',C
-print 'X0\n', X0
-
-laml=[1.0]
+print laml
 
 for lam in laml:
 	D,v = get_L(A=A,lam=lam)                                        #diagonalize lambda*A
@@ -155,6 +136,7 @@ for lam in laml:
 	Ux = Ex+lam*Vx
 	evl.append([Ex,Vx,Ux,lam])
 	Xl.append(Xk)
+        print 'lam={};Ex={};Vx={}'.format(lam,Ex,Vx)
 pe=  [x[0] for x in evl]
 pv=  [x[1] for x in evl]
 ul=  [x[2] for x in evl]
@@ -164,10 +146,28 @@ s['E'] = pe
 s['V'] = pv
 s['U'] = ul
 s['L'] = laml
+s['X'] = Xl
 
 print s
+
+
+
+minEx = s.loc[s.E==s.E.min()].X.values.tolist()[0]
+minVx = s.loc[s.V==s.V.min()].X.values.tolist()[0]
+minE = s.loc[s.E==s.E.min()][['V','E']].values.tolist()[0]
+minV = s.loc[s.V==s.V.min()][['V','E']].values.tolist()[0]
 plt.plot(pv,pe)
+plt.scatter(minV[0],minV[1])
+plt.scatter(minE[0],minE[1])
 plt.show()
+
+plt.plot(minEx,label='minE',marker='v')
+plt.plot(minVx,label='minV',linestyle='--',marker='o')
+plt.legend()
+plt.show()
+
+
+#
 #s.plot(x='V',y='E',kind='scatter')
 #plt.show()
 #s.plot(x='L',y='U',kind='scatter',label='U')
@@ -176,7 +176,6 @@ plt.show()
 #
 #plt.show()
 '''
- IMPLEMENT ME!
 G
 [[ 4.7100747   0.        ]
  [ 0.          3.38819475]]
@@ -188,4 +187,19 @@ C
  [ 0.6869943   0.28034613]]
 X0
 [ 4948. -3860.]
+'''
+'''
+print 'G\n',G
+print 'H\n',H 
+print 'C\n',C
+print 'X0\n', X0
+G=np.array(
+[[ 4.7100747 ,  0.        ],
+ [ 0.        ,  3.38819475]])
+H=np.array(
+[[ 9.61763011,  0.        ],
+ [ 0.        ,  8.0691695 ]])
+C=np.array([[ 0.83585851 , 0.6869943 ],
+ [ 0.6869943  , 0.28034613]])
+X0=np.array([ 4948., -3860.])
 '''
