@@ -70,26 +70,25 @@ def get_Xk(D=None,v=None,N=None,z0=None,sqrt_inv_Htilde=None):
 	return Xk
 
 
-def get_min_impact_min_var():
-    print 'in get min_impact_min-- IMPLEMENT ME!'
-    pass
+def get_min_impact_min_var(X0=None,N=None):
+    return [ X0*(N-n)*1/N for n in range(N+1)] 
 
 
 
 
 
-n=5             #no. securities
-gamma=0.00000250    #linear permanent impact [ ($/share)/share ] gamma g(v_k) = gamma*v ; E<-sum_k( t*x_k*g(v))
-                
-eta=5           #Hij = Hij*deltaij*eta_i [ ($/share)*1/(share/time)] ; h(v_k) = eta n_k/t ; E<-sum_k(   n_k*h(v))
-x0=500         #seed amt to trade (buy/sell)
-N = 5           #no. trade intervals
+n=2             #no. securities
+gamma= 0.5      #2.5*10**-2    #linear permanent impact [ ($/share)/share ] gamma g(v_k) = gamma*v ; E<-sum_k( t*x_k*g(v))
+eta  = 2.5      #2.5*10**2     #Hij = Hij*deltaij*eta_i [ ($/share)*1/(share/time)] ; h(v_k) = eta n_k/t ; E<-sum_k(   n_k*h(v))
+x0   = 2500     #1.0*10**3     #amt to trade (buy/sell)
+N = 4           #no. trade intervals
 T = N           #no. time intervals
 tau = T*1.0/N   #time per trade interval
 
 
 #vector of initial holdings
 X0 = np.array([ np.rint( random.uniform(0,1)*random.choice([-1,1])*x0)  for x in range(n)])
+#X0 = np.array([ np.rint(x0)  for x in range(n)])
 
 # Hij = deltaij*eta_ij
 H =  np.diag(np.array([eta  for x in range(n)]))
@@ -102,10 +101,6 @@ C =  0.5*(b + b.transpose())
 Hs = 0.5*(H+H.transpose())
 Gs = 0.5*(G+G.transpose())
 Ga = 0.5*(G-G.transpose())
-
-
-get_min_impact_min_var()
-
 
 
 Htilde = Hs - 0.5*tau*Gs    #tau*Gs (subtract time*$/share*share/time )
@@ -154,52 +149,16 @@ print s
 
 minEx = s.loc[s.E==s.E.min()].X.values.tolist()[0]
 minVx = s.loc[s.V==s.V.min()].X.values.tolist()[0]
-minE = s.loc[s.E==s.E.min()][['V','E']].values.tolist()[0]
-minV = s.loc[s.V==s.V.min()][['V','E']].values.tolist()[0]
+minE =  s.loc[s.E==s.E.min()][['V','E']].values.tolist()[0]
+minV =  s.loc[s.V==s.V.min()][['V','E']].values.tolist()[0]
+minIm = get_min_impact_min_var(X0=X0,N=N)
 plt.plot(pv,pe)
 plt.scatter(minV[0],minV[1])
 plt.scatter(minE[0],minE[1])
 plt.show()
 
-plt.plot(minEx,label='minE',marker='v')
-plt.plot(minVx,label='minV',linestyle='--',marker='o')
+plt.plot(minEx,label='minExp(C)',marker='v')
+plt.plot(minVx,label='minVar(C)',linestyle='--',marker='o')
+plt.plot(minIm,label='minImp(C)',linestyle=':',marker='.')
 plt.legend()
 plt.show()
-
-
-#
-#s.plot(x='V',y='E',kind='scatter')
-#plt.show()
-#s.plot(x='L',y='U',kind='scatter',label='U')
-#s.plot(x='L',y='E',kind='scatter',label='E')
-#s.plot(x='L',y='V',kind='scatter',label='V')
-#
-#plt.show()
-'''
-G
-[[ 4.7100747   0.        ]
- [ 0.          3.38819475]]
-H
-[[ 9.61763011  0.        ]
- [ 0.          8.0691695 ]]
-C
-[[ 0.83585851  0.6869943 ]
- [ 0.6869943   0.28034613]]
-X0
-[ 4948. -3860.]
-'''
-'''
-print 'G\n',G
-print 'H\n',H 
-print 'C\n',C
-print 'X0\n', X0
-G=np.array(
-[[ 4.7100747 ,  0.        ],
- [ 0.        ,  3.38819475]])
-H=np.array(
-[[ 9.61763011,  0.        ],
- [ 0.        ,  8.0691695 ]])
-C=np.array([[ 0.83585851 , 0.6869943 ],
- [ 0.6869943  , 0.28034613]])
-X0=np.array([ 4948., -3860.])
-'''
