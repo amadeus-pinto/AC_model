@@ -117,8 +117,6 @@ evl=[]
 Xl=[]
 
 laml = np.logspace(-6,0)
-#lamnl=-1*np.logspace(-6,-0)
-#laml =np.sort( list(laml)+list(lamnl))
 
 print laml
 
@@ -142,8 +140,6 @@ s['V'] = pv
 s['U'] = ul
 s['L'] = laml
 s['X'] = Xl
-
-print s
 
 
 
