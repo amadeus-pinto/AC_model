@@ -7,9 +7,9 @@ mean-variance optimization of transaction costs.
 
 
 ## sample results
-  * __set of optimal schedule solutions in the cost-risk plane; trade-off is apparent between costly minimum-risk solution (blue) and risky minimum-cost solution (yellow)__
+  * __set of optimal schedule solutions in the cost(x)-risk(y) plane; trade-off is apparent between costly minimum-risk solution (blue) and risky minimum-cost solution (orange)__
   
 ![alt text](https://github.com/amadeus-pinto/AC_model/blob/master/figs/EvL.png)
 
-  * __minimum-cost and -variance solutions ;  __
+  * __minimum-cost and -variance solutions for a two-security (one bought and one sold) trading schedule with linear impact and non-diagonal transaction and price covariances ; axes are quantity and time;  __
 ![alt text](https://github.com/amadeus-pinto/AC_model/blob/master/figs/buy_sell_im.png)
