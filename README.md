@@ -11,5 +11,5 @@ mean-variance optimization of transaction costs.
   
 ![alt text](https://github.com/amadeus-pinto/AC_model/blob/master/figs/EvL.png)
 
-  * __minimum-cost and -variance trade trajectories for a two-security (one bought and one sold) schedule with linear impact and non-diagonal transaction and price covariances ; axes are quantity and time; minimum-variance solutions go to zero more steeply than minimum-cost solutions__
+  * __minimum-cost and -variance trade trajectories for a two-security (one bought and one sold) schedule with linear impact and non-diagonal transaction and price covariances ; quantity held (y axis) goes to zero more steeply in time (x axis) than the minimum-cost solution__
 ![alt text](https://github.com/amadeus-pinto/AC_model/blob/master/figs/buy_sell_im.png)
